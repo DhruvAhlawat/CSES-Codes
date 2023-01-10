@@ -12,10 +12,13 @@
 #define int long long // for huge inputs,outputs, can be removed for space
 using namespace std;
 
-const long long MOD = 1000000007
+const long long MOD = 1000000007;
 #define all(x) (x).begin(), (x).end()
 #define FASTINOUT cin.tie(0); ios::sync_with_stdio(false);
-;ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
+#include<ext/pb_ds/assoc_container.hpp>
+#include<ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
 ll s = 1;
 ll e = n;
 while(s <= e)
@@ -61,7 +64,41 @@ int GCD(int a, int b)
    if (b == 0) return a;
    return GCD(b, a%b);
 }
+int LCM(int a,int b)
+{
+    return (a/GCD(a,b))*b;
+}
 
+
+set<int> PRIMES;
+vector<int> PRIMES_vec;
+void SetPrimesEratosthenes(int n)
+{
+    set<int> p;
+    vector<int> p_vec;
+    PRIMES_vec.clear();
+    //doing the sieve of eratosthenes prime reporting algorithm
+    //primes.insert(2);
+    vector<bool> done(n+1,false);
+    for (int i = 2; i <= n; i++)
+    {
+        //finding primes
+        if(done[i] == false)
+        {
+            //then we insert it
+            p.insert(i);
+            p_vec.push_back(i);
+            done[i] = true;
+            //and remove all of its multiples
+            for (int j = 0; j <= n; j+=i)
+            {
+                done[j] = true;
+            }
+        }
+    }
+    PRIMES = p;
+    PRIMES_vec = p_vec;
+}
 long long binExpMod(long long n,long long r,long long modulus)
 {
     n = (n%modulus);
@@ -76,7 +113,8 @@ long long binExpMod(long long n,long long r,long long modulus)
     
     if(r%2 == 0)
     {
-        return (((binExpMod(n,(r/2),modulus))*(binExpMod(n,(r/2),modulus)))%modulus);
+        int k = binExpMod(n,(r/2),modulus);
+        return ((k)*(k))%modulus;
     }
     else
     {
@@ -84,6 +122,30 @@ long long binExpMod(long long n,long long r,long long modulus)
     }
 }
 
+int nCr(int a,int b,int modulus)
+{
+    int ans = 1;
+    b = min(b,a-b);
+    for (int i = 0; i < b; i++)
+    {
+        ans = (ans*(a-i))%modulus;
+        ans = ans*binExpMod(i+1,modulus-2,modulus);
+        ans %= modulus;
+    }
+    return ans;
+}
+int ExtendedEuclidean(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    int x1, y1;
+    int d = ExtendedEuclidean(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - y1 * (a / b);
+    return d;
+}
 int sqrtFloored(int x)
 {
     int k = sqrt(x);
@@ -102,18 +164,6 @@ int sqrtFloored(int x)
         return k-1;
     }
 }
-/* void printVectorArray(vector<ll> a)
-{
-    for(int i = 0;i < a.size();i++)
-    {
-        cout << a[i] << " "; 
-    }
-    cout << "\n";
-} */
-void FullSort(vector<int> &a)
-{
-    sort(a.begin(),a.end());
-}
 void printVectorGrid(vector<vector<ll>> a)
 {
     for(int j = 0;j < a.size();j++) {
@@ -124,45 +174,26 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
+
+typedef tree<int,null_type,less<int>,
+rb_tree_tag,tree_order_statistics_node_update> ordered_set;
+
 signed main()
 {
     FASTINOUT;
-    int n; int k;
-    cin >> n >> k;
-    //now
-    set<int> a;
-    for (int i = 0; i < n; i++)
+    int n,k; cin >> n >> k;
+    ordered_set stuff;
+    for (int i = 1; i <= n; i++)
     {
-        a.insert(i+1);
+        stuff.insert(i);
     }
-    vector<int> removed;
-    bool startAtFirst = false;
-    int nextOne = k;
-    auto it = a.begin();
-    while(a.size() > 0)
-    { 
-
-        for (int i = 0; i < k%(a.size()); i++)
-        {
-            it++;
-            if(it == a.end())
-                it = a.begin();
-        }
-        cout << *it << " ";
-        auto tor = it;
-        it++;
-        a.erase(tor);
-        if(it == a.end())
-            it =a.begin();
-
-        // for (int i = removed.size()-1; i >= 0; i--)
-        // {
-        //     a.erase(removed[i]);
-        //     removed.pop_back();
-        // }
+    int cur = -1;
+    while(stuff.size() != 0)
+    {
+        int pos = (cur+ k + 1)%stuff.size(); 
+        auto elem = stuff.find_by_order(pos);
+        cout << *elem;
+        //stuff.erase(elem); 
     }
-    
-    
-
-    
+ 
 }

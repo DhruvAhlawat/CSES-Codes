@@ -9,13 +9,16 @@
 #include<queue>
 #define ll long long
 #define pint pair<int,int>
-#define int long long // for huge inputs,outputs, can be removed for space
+//#define int long long // for huge inputs,outputs, can be removed for space
 using namespace std;
 
-const long long MOD = 1000000007
+const long long MOD = 1000000007;
 #define all(x) (x).begin(), (x).end()
 #define FASTINOUT cin.tie(0); ios::sync_with_stdio(false);
-;ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
+#include<ext/pb_ds/assoc_container.hpp>
+#include<ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
 ll s = 1;
 ll e = n;
 while(s <= e)
@@ -131,6 +134,18 @@ int nCr(int a,int b,int modulus)
     }
     return ans;
 }
+int ExtendedEuclidean(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    int x1, y1;
+    int d = ExtendedEuclidean(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - y1 * (a / b);
+    return d;
+}
 int sqrtFloored(int x)
 {
     int k = sqrt(x);
@@ -149,18 +164,6 @@ int sqrtFloored(int x)
         return k-1;
     }
 }
-/* void printVectorArray(vector<ll> a)
-{
-    for(int i = 0;i < a.size();i++)
-    {
-        cout << a[i] << " "; 
-    }
-    cout << "\n";
-} */
-void FullSort(vector<int> &a)
-{
-    sort(a.begin(),a.end());
-}
 void printVectorGrid(vector<vector<ll>> a)
 {
     for(int j = 0;j < a.size();j++) {
@@ -171,80 +174,39 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
+typedef tree<pint,null_type,less<pint>,
+rb_tree_tag,tree_order_statistics_node_update> ordered_set;
 signed main()
 {
     FASTINOUT;
-    int n,k;
-    cin >> n >> k;
+    int n,k; cin >> n >> k;
+    int pos = (k%2 == 0)? k/2 - 1:k/2;
     vector<int> a(n,0);
     for(int i = 0;i < n;i++)
     {
         cin >> a[i];
     }
     
-    // int upCost = 0,downCost=0,sameNumber = 0;
-    int sum = 0;
-    multiset<int> windowElements;
+
+    ordered_set s; 
     for (int i = 0; i < k; i++)
     {
-        sum += a[i];
-    //    windowElements.insert(a[i]);
+        s.insert({a[i],i});
     }
-    int sameNumber = (sum%k > k/2)?(sum/k + 1):sum/k;
-    // for (int i = 0; i < k; i++)
-    // {
-    //     if(a[i] > sameNumber)
-    //     {
-    //         upCost += a[i] - sameNumber;
-    //     }
-    //     else
-    //     {
-    //         downCost += sameNumber - a[i];
-    //     }
-    // }
-    // vector<int> ans(n,0);
-    
-    // ans[0] = upCost + downCost;
-    // printVectorArray(ans);
-    // for (int i = 0; i < n-k; i++)
-    // {
-    //     //now we discard a[i] and add a[i+k] to the window.
-    //     //gotta compute the new average
-    //     sum += a[i+k] - a[i];
-    //     int newSameNumber = (sum%k > k/2)?(sum/k + 1):sum/k;
-
-    //     //first we discard the costs due to a[i]
-    //     if(a[i] >= sameNumber)
-    //             upCost -= a[i] - sameNumber;
-    //         else
-    //             downCost -= sameNumber - a[i];
-    //     //and then we add the costs due to a[i+k]
-    //     if(a[i+k] >= sameNumber)
-    //             upCost += a[i+k] - sameNumber;
-    //         else
-    //             downCost += sameNumber - a[i+k];
-    //     //then we consider the rest of the costs
-    //     if(newSameNumber > sameNumber)
-    //     {
-    //         //we need to first check how many numbers now went above or below 
-
-    //     }
-    // }
-    int cost = 0;
+    int curMed = (*s.find_by_order(pos)).first;
+    int curCost = 0;
     for (int i = 0; i < k; i++)
     {
-        cost += abs(a[i] - sameNumber);
+        curCost += max(a[i] - curMed, curMed - a[i]);
     }
-    cout << cost << " ";
-    for (int i = 0; i < n-k; i++)
+    //the first one is ready, now we need to update accordingly
+
+    for (int i = k; i < n; i++)
     {
-        sum += a[i+k] - a[i];
-        int newSameNumber = (sum%k > k/2)?(sum/k + 1):sum/k;
-        cost += abs(a[i+k]-newSameNumber) - abs(a[i] - sameNumber);
-        sameNumber = newSameNumber;
-        cout << cost << " ";
+        cout << curCost << " ";
+        int elemToRemove = a[i-k]; int elemToAdd = a[i];
+        s.erase({a[i-k],i-k}); s.insert({a[i],i});
+        int newMed = (*s.find_by_order(pos)).first; 
+        
     }
-    
-    
- 
 }

@@ -12,13 +12,13 @@
 #define int long long // for huge inputs,outputs, can be removed for space
 using namespace std;
 
-const long long MOD = 1000000007
+const long long MOD = 1000000007;
 #define all(x) (x).begin(), (x).end()
 #define FASTINOUT cin.tie(0); ios::sync_with_stdio(false);
 //#include<ext/pb_ds/assoc_container.hpp>
 //#include<ext/pb_ds/tree_policy.hpp>
 //using namespace __gnu_pbds;
-;ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
+ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
 ll s = 1;
 ll e = n;
 while(s <= e)
@@ -178,36 +178,47 @@ signed main()
 {
     FASTINOUT;
     int n,m; cin >> n >> m;
-    vector<vector<pint>> adj(n);
+    vector<int> dist(n,MOD*MOD), FlightMin(n,MOD*MOD), FlightMax(n,0), paths(n,0); 
+    dist[0] = 0; FlightMin[0] = 0; paths[0] = 1;
+    vector<vector<pint>> Adj(n);
     for (int i = 0; i < m; i++)
     {
-        int x,y,c; cin >> x >> y >> c;
-        x--; y--;
-        adj[x].push_back({c,y});
-        //adj[y].push_back({c,x});//filling the adjacency list
+        int a,b,c; cin >> a >> b >> c;
+        a--; b--;
+        Adj[a].push_back({b,c});
     }
     
-    //now to perform djikstra's algorithm on this dataset
-    priority_queue<pint,vector<pint>,greater<pint>> store;
-    vector<int> minDist(n,-1);
-    //minDist[0] = 0;
-    store.push({0,0}); //first stores the mindistance, second stores the vertex number
-    //unforunately this priority quee does not support update priority operations
-    while(store.size() != 0)
+
+    //now we simply implement Djikstras
+    priority_queue<pint,vector<pint>,greater<pint>> rem; //greater<pint>() ensures that it is in ascending order
+    rem.push({0,0});
+    vector<bool> visited(n,false);
+    while(rem.size() != 0)
     {
-        pint cur = store.top(); store.pop();
-        //store the number
-        int v = cur.second; 
-        if(minDist[v] != -1) //already reached this vertex before and whatever we have now must be greater than before
-            continue;  //already popped so we can just continue
-        minDist[v] = cur.first; 
-        for (int i = 0; i < adj[v].size(); i++)
+        pint cur = rem.top(); rem.pop();
+        if(visited[cur.second]) continue;
+        visited[cur.second] = true;
+        if(dist[cur.second] == MOD*MOD) continue; //cant do shiz with this
+        for (int i = 0; i < Adj[cur.second].size(); i++)
         {
-            // if(minDist[adj[v][i].second] != -1) //already visited its neighbour before
-            //     continue;
-            //else we add it to the priority queue
-            store.push({cur.first + adj[v][i].first, adj[v][i].second}); //new updated distance
+            if(visited[Adj[cur.second][i].first]) continue;
+            //else
+            if(dist[Adj[cur.second][i].first] > dist[cur.second] + Adj[cur.second][i].second)
+            {
+                dist[Adj[cur.second][i].first] = dist[cur.second] + Adj[cur.second][i].second;
+                paths[Adj[cur.second][i].first] = paths[cur.second];
+                FlightMin[Adj[cur.second][i].first] = FlightMin[cur.second] + 1;
+                FlightMax[Adj[cur.second][i].first] = FlightMax[cur.second] + 1;
+                rem.push({dist[Adj[cur.second][i].first] ,Adj[cur.second][i].first});
+            }
+            else if(dist[Adj[cur.second][i].first] == dist[cur.second] + Adj[cur.second][i].second)
+            {
+                paths[Adj[cur.second][i].first] = (paths[Adj[cur.second][i].first]+paths[cur.second])%MOD;
+                FlightMin[Adj[cur.second][i].first] = min(FlightMin[cur.second] + 1,FlightMin[Adj[cur.second][i].first]);
+                FlightMax[Adj[cur.second][i].first] = max(FlightMax[cur.second] + 1,FlightMax[Adj[cur.second][i].first]);
+                rem.push({dist[Adj[cur.second][i].first] ,Adj[cur.second][i].first});
+            }
         }
     }
-    printVectorArray(minDist);
+    cout << dist[n-1] << " " << paths[n-1] << " " << FlightMin[n-1] << " " << FlightMax[n-1] << endl;
 }

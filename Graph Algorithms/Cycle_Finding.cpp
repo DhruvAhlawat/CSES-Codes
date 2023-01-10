@@ -11,26 +11,14 @@
 #define pint pair<int,int>
 #define int long long // for huge inputs,outputs, can be removed for space
 using namespace std;
-
-const long long MOD = 1000000007
+#define ff first 
+#define ss second 
+const long long MOD = 1000000007;
 #define all(x) (x).begin(), (x).end()
 #define FASTINOUT cin.tie(0); ios::sync_with_stdio(false);
 //#include<ext/pb_ds/assoc_container.hpp>
 //#include<ext/pb_ds/tree_policy.hpp>
 //using namespace __gnu_pbds;
-;ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
-ll s = 1;
-ll e = n;
-while(s <= e)
-{
-    ll mid = (s + e) / 2;
-    if(dp[mid] == key) return mid; 
-    else if (dp[mid] > key) e = mid - 1;
-    else s = mid + 1;
-}
-return -1;
-}
-
 string CONVERT_TO_BINARY(ll s) {
     string res = "";
     while(s != 0) { 
@@ -174,40 +162,66 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
+vector<bool> under;
+
 signed main()
 {
     FASTINOUT;
     int n,m; cin >> n >> m;
-    vector<vector<pint>> adj(n);
+    vector<pair<pint,int>> edges;
+    vector<vector<pint>> Adj(n);
     for (int i = 0; i < m; i++)
     {
-        int x,y,c; cin >> x >> y >> c;
-        x--; y--;
-        adj[x].push_back({c,y});
-        //adj[y].push_back({c,x});//filling the adjacency list
+        int a,b,x; cin >> a >> b >> x; 
+        a--; b--;
+        edges.push_back({{a,b},x});
+        Adj[a].push_back({b,x});
     }
-    
-    //now to perform djikstra's algorithm on this dataset
-    priority_queue<pint,vector<pint>,greater<pint>> store;
-    vector<int> minDist(n,-1);
-    //minDist[0] = 0;
-    store.push({0,0}); //first stores the mindistance, second stores the vertex number
-    //unforunately this priority quee does not support update priority operations
-    while(store.size() != 0)
+    //just run bellman ford then
+    vector<int> dist(n,MOD*MOD);
+    vector<int> prev(n,-1);
+    for (int i = 0; i < n-1; i++)
     {
-        pint cur = store.top(); store.pop();
-        //store the number
-        int v = cur.second; 
-        if(minDist[v] != -1) //already reached this vertex before and whatever we have now must be greater than before
-            continue;  //already popped so we can just continue
-        minDist[v] = cur.first; 
-        for (int i = 0; i < adj[v].size(); i++)
+        for (int j = 0; j < m; j++)
         {
-            // if(minDist[adj[v][i].second] != -1) //already visited its neighbour before
-            //     continue;
-            //else we add it to the priority queue
-            store.push({cur.first + adj[v][i].first, adj[v][i].second}); //new updated distance
+            if(dist[edges[j].ff.ss] > dist[edges[j].ff.ff] + edges[j].ss)
+            {
+                dist[edges[j].ff.ss] = dist[edges[j].ff.ff] + edges[j].ss;
+                prev[edges[j].ff.ss] = edges[j].ff.ff;
+            }
         }
     }
-    printVectorArray(minDist);
+    int negVert = -1;
+    for (int j = 0; j < m; j++)
+    {
+        if(dist[edges[j].ff.ss] > dist[edges[j].ff.ff] + edges[j].ss)
+        {
+            negVert = edges[j].ff.ss;
+            prev[edges[j].ff.ss] = edges[j].ff.ff;
+            break;
+        }
+    }
+    if(negVert == -1)
+    {
+        No();
+        return 0;
+    }
+    Yes();
+    //now we have the vertex we need
+    vector<int> path;
+    for (int i = 0; i < n; i++)
+    {
+        negVert = prev[negVert];
+    }
+    cout << negVert + 1<< endl;
+    //return 0;
+    for (int cur = negVert; path.size() <= 1 || cur != negVert ; cur = prev[cur])
+    {
+        path.push_back(cur+1);
+        if(cur == negVert && path.size() > 1)
+            break; 
+    }
+    path.push_back(negVert+1); 
+    reverse(all(path));
+    printVectorArray(path); 
 }

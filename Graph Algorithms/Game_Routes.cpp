@@ -12,13 +12,13 @@
 #define int long long // for huge inputs,outputs, can be removed for space
 using namespace std;
 
-const long long MOD = 1000000007
+const long long MOD = 1000000007;
 #define all(x) (x).begin(), (x).end()
 #define FASTINOUT cin.tie(0); ios::sync_with_stdio(false);
 //#include<ext/pb_ds/assoc_container.hpp>
 //#include<ext/pb_ds/tree_policy.hpp>
 //using namespace __gnu_pbds;
-;ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
+ll BINARY_SEARCH(vector<ll> dp , ll n , ll key) {
 ll s = 1;
 ll e = n;
 while(s <= e)
@@ -174,40 +174,62 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
+
+vector<bool> visited;
+vector<int> ans;
+void topSort(int cur, vector<vector<int>> &Adj)
+{
+    visited[cur] = true;
+    for (int i = 0; i < Adj[cur].size(); i++)
+    {
+        if(visited[Adj[cur][i]] == false)
+        {
+            topSort(Adj[cur][i], Adj);
+        }
+    }
+    ans.push_back(cur);
+}
+vector<int> DFS(vector<vector<int>> &Adj)
+{
+    if(visited.size() == 0)
+    {
+        visited = vector<bool>(Adj.size(),false);
+    }
+    for (int i = 0; i < Adj.size(); i++)
+    {
+        if(visited[i] == false)
+        {
+            topSort(i,Adj); 
+        }
+    }
+    reverse(all(ans));
+    return ans; //returns the finally topological sorted array
+}
 signed main()
 {
     FASTINOUT;
     int n,m; cin >> n >> m;
-    vector<vector<pint>> adj(n);
-    for (int i = 0; i < m; i++)
+    vector<vector<int>> Adj(n);
+    for(int i = 0; i < m; i++)
     {
-        int x,y,c; cin >> x >> y >> c;
-        x--; y--;
-        adj[x].push_back({c,y});
-        //adj[y].push_back({c,x});//filling the adjacency list
+        int a,b; cin >> a >> b;
+        a--; b--; 
+        Adj[a].push_back(b);
     }
-    
-    //now to perform djikstra's algorithm on this dataset
-    priority_queue<pint,vector<pint>,greater<pint>> store;
-    vector<int> minDist(n,-1);
-    //minDist[0] = 0;
-    store.push({0,0}); //first stores the mindistance, second stores the vertex number
-    //unforunately this priority quee does not support update priority operations
-    while(store.size() != 0)
+
+    DFS(Adj);
+    //*printVectorArray(ans);
+
+    vector<int> dp(n,0);
+    dp[0] = 1;
+    for (int i = 0; i < n; i++)
     {
-        pint cur = store.top(); store.pop();
-        //store the number
-        int v = cur.second; 
-        if(minDist[v] != -1) //already reached this vertex before and whatever we have now must be greater than before
-            continue;  //already popped so we can just continue
-        minDist[v] = cur.first; 
-        for (int i = 0; i < adj[v].size(); i++)
+        int cur = ans[i];
+        if(dp[cur] == 0) continue;
+        for (int j = 0; j < Adj[cur].size(); j++)
         {
-            // if(minDist[adj[v][i].second] != -1) //already visited its neighbour before
-            //     continue;
-            //else we add it to the priority queue
-            store.push({cur.first + adj[v][i].first, adj[v][i].second}); //new updated distance
+            dp[Adj[cur][j]] = (dp[Adj[cur][j]] + dp[cur])%MOD;
         }
     }
-    printVectorArray(minDist);
+    cout << dp[n-1] << endl;
 }
