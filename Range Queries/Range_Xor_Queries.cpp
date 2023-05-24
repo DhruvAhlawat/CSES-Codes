@@ -135,34 +135,116 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
+
+class SegTree
+{
+    //v starts from 0, root stored at v = 0
+    //children of vertex v stored at - left= 2*v+1, right- 2*v + 2
+
+
+    public:
+    vector<int> arr;
+    
+    int defaultValue = 0; //keep a large integer incase we want operations wiht minimum
+    SegTree(vector<int> a)
+    {
+        arr = vector<int>(4*a.size() + 1,defaultValue);
+        build(a,0,0,a.size()-1);
+    }
+    //make a build operation
+    int functionToStore(int c1, int c2)
+    {
+        return (c1^c2);
+    }
+
+    void build(vector<int> &a, int v, int l, int r)
+    {
+        if(l == r)
+        {
+            arr[v] = a[l];
+        }
+        else
+        {
+            int mid = (l+r)/2;
+            build(a,v*2 + 1,l,mid);
+            build(a,2*v + 2,mid+1,r);
+            //change this function as needed
+            arr[v] = functionToStore(arr[2*v+1], arr[2*v+2]); 
+        }
+    }
+
+    int calculate(int v, int curL, int curR, int rangeL, int rangeR)
+    {
+        if(rangeR < rangeL)
+            return defaultValue;
+        if(rangeR == curR && rangeL == curL)
+        {
+            return arr[v];
+        }
+        int mid = (curR + curL)/2;
+        return functionToStore(calculate(v*2+1,curL, mid, rangeL, min(rangeR,mid)),
+        calculate(2*v+2,mid+1,curR, max(rangeL,mid+1), rangeR));
+    }
+
+    // void update(int v, int curL, int curR, int pos, int new_val)
+    // {
+    //     if(curL == curR)
+    //     {
+    //         arr[v] = new_val;
+    //     }
+    //     else
+    //     {
+    //         int mid = (curL + curR)/2;
+    //         if(pos <= mid)
+    //         {
+    //             update(v*2 + 1,curL, mid,pos,new_val);
+    //         }
+    //         else
+    //         {
+    //             update(2*v + 2,mid+1,curR,pos,new_val);
+    //         }
+    //         arr[v] = functionToStore(arr[2*v+1], arr[2*v+2]); 
+    //     }
+    // }
+    void Update(int v, int curL, int curR, int pos, int newVal)
+    {
+        if( curL    == curR)
+        {
+            //should be equal to pos
+            arr[v] = newVal;
+        }
+        else
+        {
+            int mid = (curL + curR)/2;
+            if(pos <= mid)
+            Update(2*v+1,curL,mid,pos,newVal); 
+            else
+            Update(2*v+2, mid+1,curR,pos,newVal);
+
+            arr[v] = functionToStore(arr[2*v+1],arr[2*v+2]);
+        }
+    }
+
+};
+
 signed main()
 {
     FASTINOUT;
-    int n; cin >> n;
+    int n,q; cin >> n >> q;
     vector<int> a(n,0);
     for(int i = 0;i < n;i++)
     {
         cin >> a[i];
     }
     
-    vector<int> dp(n,MOD); //the ith position stores the minimum number at the end of the 
-                            //(i+1)th sized subsequences till now
-    for (int i = 0; i < n; i++)
+    SegTree tree(a);
+    for (int i = 0; i < q; i++)
     {
-        //then we try to check where we can put this number
-        auto k = lower_bound(all(dp),a[i]);
-        //at this location we have that 
-        int curSubsqSize = (k - dp.begin());
-        // if(*k == a[i]) //that means the last element was already a[i] hence we cant really add this to the subsq
-        // {
-        //     continue;
-        // }
-        dp[curSubsqSize] = min(dp[curSubsqSize],a[i]); 
+        int b,c; cin >> b >> c;
+        {
+            cout << tree.calculate(0,0,n-1,b-1,c-1) << endl;
+        }
     }
-    int ans = 0;
-    while(dp[ans] < MOD && ans < n)
-    {
-        ans++;
-    }
-    cout << ans << endl;
+    
+ 
 }

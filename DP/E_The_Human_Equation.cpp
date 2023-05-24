@@ -138,31 +138,27 @@ void printVectorGrid(vector<vector<ll>> a)
 signed main()
 {
     FASTINOUT;
-    int n; cin >> n;
-    vector<int> a(n,0);
-    for(int i = 0;i < n;i++)
+    int t;
+    cin >> t;
+    for(int testCase = 0;testCase < t;testCase++)
     {
-        cin >> a[i];
+        int n; cin >> n;
+        vector<int> a(n,0);
+        for(int i = 0;i < n;i++)
+        {
+            cin >> a[i];
+        }
+        
+        vector<int> pref(n,a[0]);
+        int minPref = min(a[0],0ll);
+        int maxPref = max(a[0],0ll);
+        for (int i = 1; i < n; i++)
+        {
+            pref[i] = pref[i-1] + a[i];
+            minPref = min(pref[i],minPref);
+            maxPref = max(pref[i],maxPref);
+        }
+        cout << maxPref - minPref << endl;
     }
-    
-    vector<int> dp(n,MOD); //the ith position stores the minimum number at the end of the 
-                            //(i+1)th sized subsequences till now
-    for (int i = 0; i < n; i++)
-    {
-        //then we try to check where we can put this number
-        auto k = lower_bound(all(dp),a[i]);
-        //at this location we have that 
-        int curSubsqSize = (k - dp.begin());
-        // if(*k == a[i]) //that means the last element was already a[i] hence we cant really add this to the subsq
-        // {
-        //     continue;
-        // }
-        dp[curSubsqSize] = min(dp[curSubsqSize],a[i]); 
-    }
-    int ans = 0;
-    while(dp[ans] < MOD && ans < n)
-    {
-        ans++;
-    }
-    cout << ans << endl;
+ 
 }

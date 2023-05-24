@@ -135,34 +135,71 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
+
+class SegmentTree
+{
+    public:
+    vector<int> verts;
+
+    SegmentTree(vector<int> inputArr)
+    {
+        verts = vector<int>(4*inputArr.size()+1,0);
+        //then call the build function
+        buildTree(inputArr, 0, 0, inputArr.size()-1);
+    }
+
+    void buildTree(vector<int> &toReach,int curPos, int curL, int curR)
+    {
+        if(curL == curR)
+        {
+            verts[curPos] = toReach[curL];
+        }
+        else
+        {
+            //divide into two halfs
+            int mid = (curL + curR)/2;
+            buildTree(toReach,2*curPos+1,curL,mid); //the child is at 2*curpos+1
+            buildTree(toReach,2*curPos+2,mid+1,curR); //the second child is at 2*curpos+2
+            verts[curPos] = min(verts[2*curPos+1],verts[2*curPos+2]);
+        }
+    }
+    
+    int calculate(int curPos, int curL, int curR, int rangeL, int rangeR)
+    {
+        if(rangeR < rangeL)
+        {
+            return MOD*MOD; //returning the maximum value when this happens
+        }
+        if(rangeR == curR && rangeL == curL)
+        {
+            return verts[curPos];
+        }
+        else
+        {
+            int mid = (curL + curR)/2;
+            return (min(calculate(2*curPos+1,curL,mid,rangeL,min(rangeR,mid)),
+             calculate(2*curPos+2,mid+1,curR,max(mid+1,rangeL),rangeR)));
+        }
+    }
+};
+
 signed main()
 {
     FASTINOUT;
-    int n; cin >> n;
+    int n,q; cin >> n >> q;
     vector<int> a(n,0);
     for(int i = 0;i < n;i++)
     {
         cin >> a[i];
     }
     
-    vector<int> dp(n,MOD); //the ith position stores the minimum number at the end of the 
-                            //(i+1)th sized subsequences till now
-    for (int i = 0; i < n; i++)
+    SegmentTree bruh(a);
+    for (int i = 0; i < q; i++)
     {
-        //then we try to check where we can put this number
-        auto k = lower_bound(all(dp),a[i]);
-        //at this location we have that 
-        int curSubsqSize = (k - dp.begin());
-        // if(*k == a[i]) //that means the last element was already a[i] hence we cant really add this to the subsq
-        // {
-        //     continue;
-        // }
-        dp[curSubsqSize] = min(dp[curSubsqSize],a[i]); 
+        int a,b; cin >> a >> b;
+        a--; b--;
+        cout << bruh.calculate(0,0,n-1,a,b) << endl;
     }
-    int ans = 0;
-    while(dp[ans] < MOD && ans < n)
-    {
-        ans++;
-    }
-    cout << ans << endl;
+    
+ 
 }

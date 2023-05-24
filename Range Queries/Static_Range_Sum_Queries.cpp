@@ -138,31 +138,25 @@ void printVectorGrid(vector<vector<ll>> a)
 signed main()
 {
     FASTINOUT;
-    int n; cin >> n;
+    int n,q; cin >> n >> q;
     vector<int> a(n,0);
     for(int i = 0;i < n;i++)
     {
         cin >> a[i];
     }
     
-    vector<int> dp(n,MOD); //the ith position stores the minimum number at the end of the 
-                            //(i+1)th sized subsequences till now
-    for (int i = 0; i < n; i++)
+    
+    vector<int> pref(n+1,a[0]);
+    pref[0] = 0;
+    for (int i = 1; i <= n; i++)
     {
-        //then we try to check where we can put this number
-        auto k = lower_bound(all(dp),a[i]);
-        //at this location we have that 
-        int curSubsqSize = (k - dp.begin());
-        // if(*k == a[i]) //that means the last element was already a[i] hence we cant really add this to the subsq
-        // {
-        //     continue;
-        // }
-        dp[curSubsqSize] = min(dp[curSubsqSize],a[i]); 
+        pref[i] = pref[i-1] + a[i-1];
     }
-    int ans = 0;
-    while(dp[ans] < MOD && ans < n)
+    for (int i = 0; i < q; i++)
     {
-        ans++;
+        int a,b; cin >> a >> b;
+        cout << pref[b] - pref[a-1] << endl;
     }
-    cout << ans << endl;
+    
+    
 }
