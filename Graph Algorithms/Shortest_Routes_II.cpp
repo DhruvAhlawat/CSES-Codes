@@ -135,42 +135,62 @@ void printVectorGrid(vector<vector<ll>> a)
         cout << "\n";
     }
 }
-
-
-
-vector<vector<int>> dp;
-int editDistance(string &a,string &b, int l1, int r1, int l2, int r2)
-{
-    //if the first characters of both the string are the same, we can just continue
-    if(l1 > r1 || l2 > r2) return MOD;
-    if(l1 == r1 && l2 == r2) return 0;
-    if(dp[l1][l2] != -1) return dp[l1][l2];
-    if(a[l1] == b[l2])
-    {
-        return editDistance(a,b,l1+1,r1,l2+1,r2);
-    }
-    //if the first characters are not equal
-    
-    //then what we can do is, try out replace AND remove both once
-    int moves[3] = {0};
-    moves[0] = 1 + editDistance(a,b,l1+1,r1,l2,r2); moves[1] = 1 + editDistance(a,b,l1,r1,l2+1,r2);
-    //the above correspond to removal and insert
-    moves[2] = 1 + editDistance(a,b,l1+1,r1,l2+1,r2); //this corresponds to replacing
-
-    sort(moves, moves + 3);
-    dp[l1][l2] = moves[0];
-    return moves[0];
-}
 signed main()
 {
     FASTINOUT;
-    string a,b; cin >> a >> b;
-    //need to find the edit distance between a and b
-    //replace, insert and remove are the operations we have been given, 
-    //each costing one operation. so the ideal method to follow after this would be
-    //to
-    dp = vector<vector<int>>(a.size()+1,vector<int>(b.size()+1, -1));
-    cout << editDistance(a,b,0,a.size(),0,b.size()) << endl;
+    int n,m,q; cin >> n >> m >> q;
+    vector<vector<pint>> roads(n);
+    for (int i = 0; i < m; i++)
+    {
+        int a,b,c; cin >> a >> b >> c;
+        a--; b--;
+        roads[a].push_back({b,c});
+        roads[b].push_back({a,c}); //since two way roads
+    }
+    vector<vector<int>> d(n ,vector<int>(n,1e18));
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < roads[i].size(); j++)
+        {
+            d[i][roads[i][j].first] = min(d[i][roads[i][j].first], roads[i][j].second); //initial distance is set as this.
+        }        
+    }
+    
+    //cannot and will not use Djikstra. Instead will use Floyd Warshall algorithm
+    for (int i = 0; i < n; i++)
+    {
+        d[i][i] = 0; //distance to itself is obviously 0.
+        //then we should set its distance to its neighbours.
 
+        for (int j = 0; j < n; j++)
+        {
+            for (int k = 0; k < n; k++)
+            {
+                d[j][k] = min(d[j][k],d[j][i] + d[i][k]);
+                d[k][j] = d[j][k];
+            }
+        }
+
+        
+
+
+    }
+
+
+
+    for (int i = 0; i < q; i++)
+    {
+        int a,b; cin >> a >> b;
+        a--; b--;
+        if(d[a][b] >= 1e18)
+        {
+            cout << -1 << endl;
+        }
+        else
+        {
+            cout << d[a][b] << endl;
+        }
+    }
+    
  
 }

@@ -1,11 +1,13 @@
 {
     "files.associations": {
+        "MLTable": "yaml",
         "xstring": "cpp",
         "utility": "cpp",
         "ios": "cpp",
         "vector": "cpp",
         "ostream": "cpp",
         "queue": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "xstddef": "cpp"
     }
 }
